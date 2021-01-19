@@ -20,7 +20,7 @@ title                    : "Choinoin's Lab."
 title_separator          : "-"
 subtitle                 : "최노인의 연구소" # site tagline that appears below site title in masthead
 name                     : "Inhyeok Choi"
-description              : "choinoin's labotory"
+description              : "Choinoin's Labotory"
 url                      : "https://choinoin.github.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
@@ -93,15 +93,18 @@ analytics:
 
 # Site Author
 author:
-  name             : "choinoin"
+  name             : "Choinoin (최노인)"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "in M.S. course"
-  location         : "Chuncheon-si, Gangwon-do, Republic of Korea"
+  location         : "Chuncheon-si, Gangwon-do"
   email            :
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       url: "mailto:ihchoi@kangwon.ac.kr"
+    - label: "Email-Personal address"
+      icon: "fas fa-fw fa-envelope-square"
+      url: "mailto:mine1998@naver.com"
     - label: "Website"
       icon: "fas fa-fw fa-link"
       url: "https://choinoin.github.io"
