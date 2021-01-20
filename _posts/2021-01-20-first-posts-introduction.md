@@ -1,6 +1,7 @@
 ---
 title: "처음으로 쓰는 글"
 date: 2021-01-20 10:49:00 -0400
+lastmod: 2021-01-20 20:31:00 -0400
 categories: article
 ---
 github.io 를 통해 만든 블로그에 처음으로 올리는 글이다.
@@ -10,7 +11,6 @@ github.io 를 통해 만든 블로그에 처음으로 올리는 글이다.
 첫 블로그에 쓰는 기념비적 글이므로 공간이나 채우는 겸 가장 기초적인 코드를 써보겠다.
 
 ```c
-
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
@@ -19,7 +19,6 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
-
 ```
 
 정말 가슴이 웅장해지는 코드이다.
@@ -27,9 +26,7 @@ int main(int argc, char *argv[]) {
 이리 멋진 코드도 python 에게는 초라할 따름이다.
 
 ```python
-
 print("Hello World!")
-
 ```
 
 신성한 Hello World 예제를 한 줄로 줄였다...
