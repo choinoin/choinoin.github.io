@@ -1,7 +1,7 @@
 ---
 title: "NoinML type 설명(Model)"
 date: 2021-05-24 10:00:00 -0400
-lastmod: 2021-05-24 10:00:00 -0400
+lastmod: 2022-11-28 21:04:05 -0400
 categories: article
 ---
 개발중인 NoinML의 data type에 대한 설명글이다.
