@@ -8,7 +8,7 @@ Centos 환경에서 chrome을 설치하기 위해선 먼저 설치파일인 rpm 
 
 rpm 파일은 wget 명령어를 통해 google 서버에서 받아올 수 있다.
 
-```console
+```bash
 
 [hostname]/home/username>wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
 
@@ -16,7 +16,7 @@ rpm 파일은 wget 명령어를 통해 google 서버에서 받아올 수 있다.
 
 이를 통해 rpm 파일을 받아왔다면 yum 명령어를 통해 해당 프로그램을 설치할 수 있다.
 
-```console
+```shell
 
 [hostname]/home/username>yum localinstall google-chrome-stable_current_x86_64.rpm
 
