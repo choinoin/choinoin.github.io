@@ -32,3 +32,17 @@ typedef struct Model {
 
 cudnnHandle은 cudnn API를 사용하기 위해 꼭 필요한 data이며, 해당 Handle을 이햐의 Layer 내 pointer에 연결하여 Layer 수준에서 cudnn 함수를 사용할 때에 활용된다.
 
+name의 경우 Model의 이름을 의미하며, NLayer는 Nodel을 구성하는 Layer의 수를 의미한다.
+
+iLayer와 fLayer는 각각 Model의 시작 Layer와 끝 Layer를 가르키는 pointer이다.
+
+Layers는 Model의 구현에 필요한 Layer 들을 저장하는 array로, 다음과 같이 할당된다.
+
+```c
+
+model->Layers = (Layer *)malloc(sizeof(Layer) * model->NLayer);
+
+```
+
+다음 기회에는 Layer data type에 대한 소개를 할 예정이다.
+
