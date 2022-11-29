@@ -32,4 +32,3 @@ typedef struct Model {
 
 cudnnHandle은 cudnn API를 사용하기 위해 꼭 필요한 data이며, 해당 Handle을 이햐의 Layer 내 pointer에 연결하여 Layer 수준에서 cudnn 함수를 사용할 때에 활용된다.
 
-
