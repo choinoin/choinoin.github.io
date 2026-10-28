@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research · CCLab@KNU</title>
+<meta name="description" content="강원대학교 화학과 전산화학연구실 (Computational Chemistry Lab, Kangwon National University)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../"><b>CCLab<span>@</span>KNU</b><small>강원대학교 화학과 전산화학연구실</small></a>
+    <nav class="nav"><a href="../">Home</a><a href="../people/">People</a><a href="../research/" class="active">Research</a><a href="../publications/">Publications</a><a href="../news/">News</a><a href="../courses/">Courses</a></nav>
+  </div>
+</header>
+<main><div class="wrap">
+
+<h1 class="page-title">Research</h1>
+<p class="page-lead">계산 및 이론 화학으로 복잡한 분자계의 물리·화학적 과정을 연구합니다</p>
+
+<div class="lang-toggle" role="group" aria-label="언어 선택">
+  <button type="button" data-set="ko" class="on">한국어</button>
+  <button type="button" data-set="en">English</button>
+</div>
+
+<div id="research" data-lang="ko">
+<section class="topic">
+  <p class="ko">전산화학연구실(이하 ‘우리 연구실’)에서는 <b>계산 및 이론 화학 방법</b>들을 이용하여 생체계 등 <b>다양한 계에서 일어나는 물리, 화학적 과정들의 메커니즘</b>에 대한 연구를 진행하고 있습니다. 우리 연구실에서 사용하는 계산 및 이론 화학 방법들은 <b>통계역학</b>에 기반을 두고 있으며, <b>컴퓨터를 이용한 모의실험(computer simulation)</b>이 주된 연구 방법의 하나입니다.</p>
+  <p class="en">Our group studies physical and chemical processes in complex molecular systems such as cell membranes. We develop and apply computational and theoretical methods, mainly computer simulations based on classical and quantum statistical mechanics, to describe these processes at the atomic and molecular levels.</p>
+</section>
+
+<section class="topic">
+  <h2><span class="ko">세포막에서 cyclic peptide nanotube의 구조와 기능</span><span class="en">Cyclic peptide nanotubes in cell membranes</span></h2>
+  <p class="ko">이온채널은 세포막에 존재하는 막단백질의 한 종류로, 이온들의 세포막 통과에 관여하면서 신경과 근육의 자극, 감각신호 전달에 중요한 역할을 담당합니다. 미국 Scripps 연구소의 Ghadiri 교수 연구진이 합성한 cyclic peptide nanotube는 이온채널과 같은 기능을 하는 합성 단백질로, 항생제나 이온센서로 사용될 수 있다고 알려져 있습니다. cyclic peptide nanotube는 곁사슬(side chain)이 친수성인지 소수성인지에 따라 크게 두 종류로 나눌 수 있습니다.</p>
+  <p class="en">Cyclic peptide nanotubes, synthesized by Prof. Ghadiri's group at the Scripps Research Institute, are synthetic proteins that function like ion channels and may be used as antibiotics or ion sensors. They fall into two classes depending on whether their side chains are hydrophilic or hydrophobic.</p>
+  <figure><img src="https://www2.kangwon.ac.kr/~cclab/images/nanotube_types01.jpg" alt="nanotube_types01.jpg" loading="lazy" onerror="this.closest('figure') ? this.closest('figure').remove() : this.remove()"></figure>
+  <p class="ko">우리 연구실에서는 분자동역학 모의실험(molecular dynamics simulation)과 몬테카를로 모의실험(Monte Carlo simulation) 등을 이용하여 cyclic peptide nanotube가 선택적으로 양이온만을 통과시키는 원인과, nanotube와 세포막의 상호작용이 이온 이동에 미치는 영향 등을 연구하고 있습니다.</p>
+  <p class="en">Using molecular dynamics (MD), Monte Carlo (MC) simulations and mean-field theories, we study why these nanotubes selectively transport cations and how nanotube–membrane interactions affect ion transport.</p>
+  <figure><img src="https://www2.kangwon.ac.kr/~cclab/images/na_in_nanotube.png" alt="Hwang et al., &lt;i&gt;J. Phys. Chem. B&lt;/i&gt; &lt;b&gt;110&lt;/b&gt;, 26448 (2006)" loading="lazy" onerror="this.closest('figure') ? this.closest('figure').remove() : this.remove()"><figcaption>Hwang et al., <i>J. Phys. Chem. B</i> <b>110</b>, 26448 (2006)</figcaption></figure>
+</section>
+
+<section class="topic">
+  <h2><span class="ko">세포막에서 단백질 삽입과 결합</span><span class="en">Insertion and assembly of proteins into cell membranes</span></h2>
+  <p class="ko">단백질 분자들이 세포막에 삽입되면서 서로 결합하는 메커니즘을 이해하는 것은 생물학 및 생명공학 분야에서 매우 중요합니다. 예를 들어 항균 펩타이드는 박테리아 세포막을 통과해 세포를 죽이는데, 이때 세포막과의 상호작용과 세포막 내 펩타이드 분자들 사이의 결합이 중요한 역할을 한다는 것은 밝혀졌지만 구체적인 메커니즘은 아직 알려져 있지 않습니다. 생물계의 큰 규모와 느린 반응속도 때문에 전원자 분자동역학 모의실험은 매우 긴 계산 시간이 필요합니다. 그 대안으로 여러 원자를 하나의 입자로 나타내는 coarse-grained 분자동역학 모의실험은 계산 효율을 크게 높일 수 있습니다. 우리 연구실에서는 이 방법을 이용하여 단백질이 세포막에 삽입되면서 서로 결합하는 메커니즘을 연구하고 있습니다.</p>
+  <p class="en">We investigate how proteins such as antimicrobial peptides insert into and assemble within membranes. Because all-atom simulations of such large, slow processes are computationally expensive, we use coarse-grained (CG) MD simulations in which groups of atoms are represented as single beads.</p>
+  <figure><img src="https://www2.kangwon.ac.kr/~cclab/images/cg_nanotube_insertion02.png" alt="cg_nanotube_insertion02.png" loading="lazy" onerror="this.closest('figure') ? this.closest('figure').remove() : this.remove()"></figure>
+</section>
+
+<section class="topic">
+  <h2>DNA translocation</h2>
+  <p class="ko">DNA translocation은 단일사슬 또는 이중사슬 DNA 분자가 세포막의 구멍(pore)이나 이온채널을 통해 세포막 한쪽에서 다른 쪽으로 이동하는 현상입니다. 이온 전류가 흐르는 이온채널에 DNA가 들어오면 전류가 감소하고, 그 감소 정도가 염기의 크기와 연관된다는 사실로부터 새로운 DNA 염기서열 분석 방법이 제안되었습니다. 우리 연구실에서는 Brownian 동역학 모의실험과 우리 연구실에서 개발한 kinetic lattice grand canonical Monte Carlo(KLGCMC) 모의실험을 결합하여, 세포막에 의한 반응장(reaction field)과 DNA 염기–이온 상호작용이 DNA translocation에 미치는 영향을 연구하고 있습니다.</p>
+  <p class="en">DNA passing through an ion channel partially blocks the ion current, and the size of the drop depends on the bases — a basis for new DNA sequencing methods. We combine Brownian dynamics with our kinetic lattice grand canonical Monte Carlo (KLGCMC) method to study membrane reaction-field effects and DNA base–ion interactions during translocation.</p>
+  <figure><img src="https://www2.kangwon.ac.kr/~cclab/images/dna_translocation02.png" alt="dna_translocation02.png" loading="lazy" onerror="this.closest('figure') ? this.closest('figure').remove() : this.remove()"></figure>
+</section>
+
+<section class="topic">
+  <h2><span class="ko">아르곤 기체에서 진행하는 충격파의 물리적 성질</span><span class="en">Shock waves in argon gas</span></h2>
+  <p class="ko">충격파(shock wave)는 강렬한 폭발이나 초음속으로 움직이는 물체에 의해 발생하는 진행성 교란으로, 충격파 전선 전후에서 밀도·온도·압력 등이 급격히 변하는 것이 특징입니다. 우리 연구실에서는 아르곤 기체에서 충격파가 진행할 때 나타나는 아르곤 분자의 운동에너지 분포 등의 성질을 비평형 분자동역학 모의실험을 개발하여 연구하고 있습니다.</p>
+  <p class="en">We study the physical properties of shock waves propagating in argon gas, such as the kinetic energy distribution of argon atoms, using nonequilibrium molecular dynamics (NEMD) simulations developed in our group.</p>
+</section>
+</div>
+
+</div></main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© Computational Chemistry Lab, Department of Chemistry, Kangwon National University</span>
+    <span>Maintained by Hyonseok Hwang</span>
+  </div>
+</footer>
+<script>
+(function () {
+  var box = document.getElementById('research');
+  var btns = document.querySelectorAll('.lang-toggle button');
+  function set(l) {
+    box.setAttribute('data-lang', l);
+    btns.forEach(function (b) { b.classList.toggle('on', b.dataset.set === l); });
+    try { localStorage.setItem('cclab-lang', l); } catch (e) {}
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { set(b.dataset.set); }); });
+  try { var s = localStorage.getItem('cclab-lang'); if (s) set(s); } catch (e) {}
+})();
+</script>
+</body>
+</html>
