@@ -638,7 +638,7 @@ courses = """
 </div>
 
 <h2>강의자료 아카이브</h2>
-<p class="note">강의자료 목록입니다. 제목을 클릭하면 본문과 첨부 PDF를 볼 수 있습니다. (일반화학·자연과학의이해는 원본 PDF가 서버에 남아 있지 않아 제목만 표시됩니다.)</p>
+<p class="note">강의자료 목록입니다. 제목을 클릭하면 본문과 첨부 PDF를 볼 수 있습니다. (첨부 파일 일람을 위해서는 코드가 필요합니다.)</p>
 
 <div class="pub-tools">
   <input type="search" id="bq" placeholder="제목으로 검색" aria-label="강의자료 검색">
@@ -720,7 +720,7 @@ board_js = "[" + ",".join("{id:%r,name:%r}" % (bid, name) for name, bid in COURS
 write_body = """
 <h1 class="page-title">글쓰기</h1>
 <p class="page-lead">폼으로 글을 쓰고 아래 버튼을 누르면 <b>올바른 경로의 MD 파일과 첨부가 담긴 zip</b>이 내려받아집니다.
-그 zip을 사이트 폴더(저장소) 루트에 풀어넣고 커밋(또는 다시 빌드)하면 글이 추가됩니다.</p>
+그 zip을 사이트 폴더(저장소) 루트에 풀어넣고 커밋(또는 다시 빌드)하면 글이 추가됩니다. 해당 파일을 관리자에 메일로 보내주세요.</p>
 
 <div class="wform">
   <label>구분
