@@ -54,8 +54,11 @@ def parse_md(path):
 
 def _inline(s):
     s = e(s)
+    # 인라인 코드 먼저 (다른 서식에서 보호)
+    s = re.sub(r"`([^`]+?)`", r"<code>\1</code>", s)
     s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
-    s = re.sub(r"`(.+?)`", r"<code>\1</code>", s)
+    s = re.sub(r"(?<!\*)\*(?!\s)(.+?)(?<!\s)\*(?!\*)", r"<em>\1</em>", s)
+    s = re.sub(r"(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)", r"<em>\1</em>", s)
     # 이미지 ![alt](src) — 링크보다 먼저 처리
     s = re.sub(r"!\[([^\]]*)\]\(([^)\s]+)\)", r'<img src="\2" alt="\1" class="post-img" loading="lazy">', s)
     s = re.sub(r"\[([^\]]+)\]\(((?:https?://|assets/)[^\s)]+)\)",
@@ -65,8 +68,29 @@ def _inline(s):
     return s
 
 
+_HR_RE = re.compile(r"^\s*([-*_])\1{2,}\s*$")
+_OL_RE = re.compile(r"^\s*\d+\.\s")
+
+
+def _is_sep_row(line):
+    if "|" not in line:
+        return False
+    body = line.strip().strip("|")
+    cells = [c.strip() for c in body.split("|")]
+    return bool(cells) and all(re.match(r"^:?-{1,}:?$", c) for c in cells if c != "")
+
+
+def _split_row(line):
+    s = line.strip()
+    if s.startswith("|"):
+        s = s[1:]
+    if s.endswith("|"):
+        s = s[:-1]
+    return [c.strip() for c in s.split("|")]
+
+
 def md_html(text):
-    """아주 작은 Markdown → HTML (제목·목록·굵게·링크·문단)."""
+    """작은 Markdown → HTML (제목·목록·표·인용·코드블록·굵게/기울임·링크·문단)."""
     lines = text.split("\n")
     out, para, i = [], [], 0
 
@@ -77,20 +101,80 @@ def md_html(text):
 
     while i < len(lines):
         ln = lines[i].rstrip()
+        stripped = ln.lstrip()
+        # 코드블록 ```lang
+        if stripped.startswith("```"):
+            flush()
+            lang = re.sub(r"[^\w+-]", "", stripped[3:].strip().split(" ")[0]) if stripped[3:].strip() else ""
+            i += 1
+            code = []
+            while i < len(lines) and not lines[i].lstrip().startswith("```"):
+                code.append(lines[i])
+                i += 1
+            i += 1  # 닫는 ``` 건너뛰기
+            cls = ' class="language-%s"' % lang if lang else ""
+            out.append("<pre><code%s>%s</code></pre>" % (cls, e("\n".join(code))))
+            continue
         if not ln.strip():
             flush()
-        elif ln.lstrip().startswith("#"):
+        elif _HR_RE.match(ln):
             flush()
-            h = ln.lstrip()
-            lvl = min(len(h) - len(h.lstrip("#")), 4) + 2
-            out.append("<h%d>%s</h%d>" % (lvl, _inline(h.lstrip("#").strip()), lvl))
-        elif ln.lstrip()[:2] in ("- ", "* "):
+            out.append("<hr>")
+        elif stripped.startswith("#"):
+            flush()
+            lvl = min(len(stripped) - len(stripped.lstrip("#")), 4) + 2
+            out.append("<h%d>%s</h%d>" % (lvl, _inline(stripped.lstrip("#").strip()), lvl))
+        elif stripped[:2] in ("- ", "* "):
             flush()
             items = []
             while i < len(lines) and lines[i].lstrip()[:2] in ("- ", "* "):
                 items.append("<li>" + _inline(lines[i].lstrip()[2:].strip()) + "</li>")
                 i += 1
             out.append("<ul>" + "".join(items) + "</ul>")
+            continue
+        elif _OL_RE.match(lines[i]):
+            flush()
+            items = []
+            while i < len(lines) and _OL_RE.match(lines[i]):
+                items.append("<li>" + _inline(re.sub(r"^\s*\d+\.\s+", "", lines[i]).strip()) + "</li>")
+                i += 1
+            out.append("<ol>" + "".join(items) + "</ol>")
+            continue
+        elif stripped.startswith(">"):
+            flush()
+            q = []
+            while i < len(lines) and lines[i].lstrip().startswith(">"):
+                q.append(lines[i].lstrip()[1:].lstrip())
+                i += 1
+            out.append("<blockquote>" + "<br>".join(_inline(x) for x in q) + "</blockquote>")
+            continue
+        elif "|" in ln and i + 1 < len(lines) and _is_sep_row(lines[i + 1]):
+            flush()
+            header = _split_row(ln)
+            aligns = []
+            for c in _split_row(lines[i + 1]):
+                if c.startswith(":") and c.endswith(":"):
+                    aligns.append("center")
+                elif c.endswith(":"):
+                    aligns.append("right")
+                elif c.startswith(":"):
+                    aligns.append("left")
+                else:
+                    aligns.append("")
+
+            def _cell(tag, val, idx):
+                st = ' style="text-align:%s"' % aligns[idx] if idx < len(aligns) and aligns[idx] else ""
+                return "<%s%s>%s</%s>" % (tag, st, _inline(val), tag)
+
+            thead = "<tr>" + "".join(_cell("th", h, j) for j, h in enumerate(header)) + "</tr>"
+            i += 2
+            rows = []
+            while i < len(lines) and "|" in lines[i] and lines[i].strip():
+                cells = _split_row(lines[i])
+                rows.append("<tr>" + "".join(_cell("td", c, j) for j, c in enumerate(cells)) + "</tr>")
+                i += 1
+            out.append('<div class="table-wrap"><table><thead>%s</thead><tbody>%s</tbody></table></div>'
+                       % (thead, "".join(rows)))
             continue
         else:
             para.append(ln)
@@ -133,12 +217,13 @@ MODAL_JS = """
       }
       return '<p class="modal-foot"><a href="' + url + '" download>첨부파일 내려받기 (' + ext + ')</a></p>';
     }
+    function put(h) { mBody.innerHTML = h; if (window.cclabHighlight) window.cclabHighlight(mBody); }
     modal.hidden = false; document.body.style.overflow = 'hidden';
     if (file && window.cclabAsk && !window.cclabUnlocked()) {
-      mBody.innerHTML = top + '<p class="modal-note">자료를 보려면 강의에서 안내한 코드를 입력하세요.</p>';
-      window.cclabAsk(function () { mBody.innerHTML = top + fileHtml(); });
+      put(top + '<p class="modal-note">자료를 보려면 코드를 입력하세요.</p>');
+      window.cclabAsk(function () { put(top + fileHtml()); });
     } else {
-      mBody.innerHTML = top + fileHtml();
+      put(top + fileHtml());
     }
   }
   function close() { modal.hidden = true; mBody.innerHTML = ''; document.body.style.overflow = ''; }
@@ -196,6 +281,7 @@ def page(path, title, active, body, extra_head="", script=""):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{root}assets/highlight/github.min.css">
 <link rel="stylesheet" href="{root}assets/style.css">{extra_head}
 </head>
 <body>
@@ -217,7 +303,11 @@ def page(path, title, active, body, extra_head="", script=""):
 </footer>
 <script>(function(){{var t=document.querySelector('.nav-toggle'),n=document.getElementById('nav');if(!t||!n)return;t.addEventListener('click',function(){{var o=n.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');}});n.addEventListener('click',function(e){{if(e.target.closest('a')){{n.classList.remove('open');t.setAttribute('aria-expanded','false');}}}});}})();</script>
 <script src="{root}assets/gate.js" defer></script>
-<script src="{root}assets/seasons.js" defer></script>{script}
+<script src="{root}assets/seasons.js" defer></script>
+<script src="{root}assets/highlight/highlight.min.js" defer></script>
+<script src="{root}assets/highlight/languages/fortran.min.js" defer></script>
+<script src="{root}assets/highlight/languages/matlab.min.js" defer></script>
+<script src="{root}assets/hl-init.js" defer></script>{script}
 </body>
 </html>
 """
@@ -818,20 +908,39 @@ write_script = """
   // 실제 렌더 미리보기 (사이트와 동일하게)
   function mdInline(s) {
     s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    s = s.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>').replace(/`(.+?)`/g, '<code>$1</code>');
+    s = s.replace(/`([^`]+?)`/g, '<code>$1</code>');
+    s = s.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
+    s = s.replace(/(?<!\\*)\\*(?!\\s)(.+?)(?<!\\s)\\*(?!\\*)/g, '<em>$1</em>');
+    s = s.replace(/(?<!\\w)_(?!\\s)(.+?)(?<!\\s)_(?!\\w)/g, '<em>$1</em>');
     s = s.replace(/!\\[([^\\]]*)\\]\\(([^)\\s]+)\\)/g, '<img src="$2" alt="$1" style="max-width:100%">');
     s = s.replace(/\\[([^\\]]+)\\]\\(((?:https?:\\/\\/|assets\\/)[^\\s)]+)\\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
     return s;
   }
+  function splitRow(line) { var s = line.trim(); if (s.charAt(0) === '|') s = s.slice(1); if (s.charAt(s.length - 1) === '|') s = s.slice(0, -1); return s.split('|').map(function (c) { return c.trim(); }); }
+  function isSep(line) { if (line.indexOf('|') < 0) return false; var cells = line.trim().replace(/^\\||\\|$/g, '').split('|').map(function (c) { return c.trim(); }); var any = false; for (var k = 0; k < cells.length; k++) { if (cells[k] === '') continue; any = true; if (!/^:?-{1,}:?$/.test(cells[k])) return false; } return any; }
+  function escCode(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function mdHtml(text) {
     var lines = (text || '').split('\\n'), out = [], para = [];
     function flush() { if (para.length) { out.push('<p>' + para.map(mdInline).join('<br>') + '</p>'); para = []; } }
+    var cell = function (tag, val, idx, al) { var s2 = (al[idx] ? ' style="text-align:' + al[idx] + '"' : ''); return '<' + tag + s2 + '>' + mdInline(val) + '</' + tag + '>'; };
     for (var i = 0; i < lines.length; i++) {
-      var ln = lines[i].replace(/\\s+$/, '');
-      if (!ln.trim()) flush();
-      else if (/^\\s*#/.test(ln)) { flush(); var h = ln.replace(/^\\s+/, ''); var lvl = Math.min(h.match(/^#+/)[0].length, 4) + 2; out.push('<h' + lvl + '>' + mdInline(h.replace(/^#+\\s*/, '')) + '</h' + lvl + '>'); }
-      else if (/^\\s*[-*]\\s/.test(ln)) { flush(); var it2 = []; while (i < lines.length && /^\\s*[-*]\\s/.test(lines[i])) { it2.push('<li>' + mdInline(lines[i].replace(/^\\s*[-*]\\s/, '')) + '</li>'); i++; } i--; out.push('<ul>' + it2.join('') + '</ul>'); }
-      else para.push(ln);
+      var ln = lines[i].replace(/\\s+$/, ''), st = ln.replace(/^\\s+/, '');
+      if (st.indexOf('```') === 0) { flush(); var lang = (st.slice(3).trim().split(' ')[0] || '').replace(/[^\\w+-]/g, ''); var code = []; i++; while (i < lines.length && lines[i].replace(/^\\s+/, '').indexOf('```') !== 0) { code.push(lines[i]); i++; } out.push('<pre><code' + (lang ? ' class="language-' + lang + '"' : '') + '>' + escCode(code.join('\\n')) + '</code></pre>'); continue; }
+      if (!ln.trim()) { flush(); continue; }
+      if (/^\\s*([-*_])\\1{2,}\\s*$/.test(ln)) { flush(); out.push('<hr>'); continue; }
+      if (/^\\s*#/.test(ln)) { flush(); var lvl = Math.min(st.match(/^#+/)[0].length, 4) + 2; out.push('<h' + lvl + '>' + mdInline(st.replace(/^#+\\s*/, '')) + '</h' + lvl + '>'); continue; }
+      if (/^\\s*[-*]\\s/.test(ln)) { flush(); var it2 = []; while (i < lines.length && /^\\s*[-*]\\s/.test(lines[i])) { it2.push('<li>' + mdInline(lines[i].replace(/^\\s*[-*]\\s/, '')) + '</li>'); i++; } i--; out.push('<ul>' + it2.join('') + '</ul>'); continue; }
+      if (/^\\s*\\d+\\.\\s/.test(ln)) { flush(); var it3 = []; while (i < lines.length && /^\\s*\\d+\\.\\s/.test(lines[i])) { it3.push('<li>' + mdInline(lines[i].replace(/^\\s*\\d+\\.\\s+/, '')) + '</li>'); i++; } i--; out.push('<ol>' + it3.join('') + '</ol>'); continue; }
+      if (st.indexOf('>') === 0) { flush(); var q = []; while (i < lines.length && lines[i].replace(/^\\s+/, '').indexOf('>') === 0) { q.push(lines[i].replace(/^\\s*>\\s?/, '')); i++; } i--; out.push('<blockquote>' + q.map(mdInline).join('<br>') + '</blockquote>'); continue; }
+      if (ln.indexOf('|') >= 0 && i + 1 < lines.length && isSep(lines[i + 1])) {
+        flush();
+        var header = splitRow(ln), al = splitRow(lines[i + 1]).map(function (c) { if (/^:.*:$/.test(c)) return 'center'; if (/:$/.test(c)) return 'right'; if (/^:/.test(c)) return 'left'; return ''; });
+        var thead = '<tr>' + header.map(function (h, j) { return cell('th', h, j, al); }).join('') + '</tr>';
+        i += 2; var rows = [];
+        while (i < lines.length && lines[i].indexOf('|') >= 0 && lines[i].trim()) { var cs = splitRow(lines[i]); rows.push('<tr>' + cs.map(function (c, j) { return cell('td', c, j, al); }).join('') + '</tr>'); i++; }
+        i--; out.push('<div class="table-wrap"><table><thead>' + thead + '</thead><tbody>' + rows.join('') + '</tbody></table></div>'); continue;
+      }
+      para.push(ln);
     }
     flush(); return out.join('\\n');
   }
@@ -854,6 +963,7 @@ write_script = """
     rm.classList.toggle('has-pdf', !!(files.length && /\\.pdf$/i.test(files[0].name)));
     rmT.textContent = title; rmD.textContent = date;
     rmB.innerHTML = (bodyHtml ? '<div class="modal-text">' + bodyHtml + '</div>' : '') + fileHtml;
+    if (window.cclabHighlight) window.cclabHighlight(rmB);
     rm.hidden = false; document.body.style.overflow = 'hidden';
   });
 

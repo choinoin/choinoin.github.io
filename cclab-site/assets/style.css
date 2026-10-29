@@ -331,3 +331,33 @@ ol.pubs li::before {
   .wform-btns { flex-direction: column; align-items: stretch; }
   .wform-btns .btn, .wform-btns .btn-ghost { width: 100%; }
 }
+
+/* ---------- 리치 마크다운 (코드블록·표·인용·구분선) ---------- */
+.modal-text pre, .post-body pre {
+  margin: .85em 0; padding: .85em 1em; background: #f6f8fa;
+  border: 1px solid #e6e3dc; border-radius: 8px; overflow-x: auto;
+}
+.modal-text pre code, .post-body pre code {
+  display: block; padding: 0; background: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .88em; line-height: 1.55; white-space: pre;
+}
+.modal-text code, .post-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9em; background: #f0eee9; padding: .1em .35em; border-radius: 4px;
+}
+.modal-text pre code.hljs, .post-body pre code.hljs { padding: 0; background: none; }
+.modal-text blockquote, .post-body blockquote {
+  margin: .85em 0; padding: .35em .95em; border-left: 3px solid #c9b48a;
+  color: #55504a; background: #faf8f3;
+}
+.modal-text blockquote p { margin: .2em 0; }
+.modal-text hr, .post-body hr { border: 0; border-top: 1px solid #e0ddd5; margin: 1.2em 0; }
+.table-wrap { overflow-x: auto; margin: .85em 0; }
+.modal-text table, .post-body table { border-collapse: collapse; width: 100%; font-size: .92em; }
+.modal-text th, .modal-text td, .post-body th, .post-body td {
+  border: 1px solid #e0ddd5; padding: .4em .6em; text-align: left;
+}
+.modal-text thead th, .post-body thead th { background: #f4f2ee; font-weight: 600; }
+.modal-text ol, .modal-text ul { padding-left: 1.4em; margin: .5em 0; }
+.modal-text em, .post-body em { font-style: italic; }
