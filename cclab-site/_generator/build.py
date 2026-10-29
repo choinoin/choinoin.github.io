@@ -313,7 +313,7 @@ pi_card = f"""
 """ if pi_name else ""
 
 # Members
-GROUPS = [("postdoc", "Postdoctoral Fellows"), ("grad", "Graduate Students"),
+GROUPS = [("resprof", "Research Professor"), ("postdoc", "Postdoctoral Fellows"), ("grad", "Graduate Students"),
           ("undergrad", "Undergraduate Students"), ("etc", "Members")]
 _members = load_posts("people/members", render=False)
 by_group = {}

@@ -4,7 +4,7 @@ name_en: Hyonseok Hwang
 role: 교수
 email: hhwang@kangwon.ac.kr
 phone: 033-250-8497
-photo: images/hhwang04.jpg
+photo: images/hhwang05.png
 ---
 ## 학력
 - **1998.09 – 2003.08** · Ph.D. in Chemistry, The University of Texas at Austin (지도교수: Prof. Peter J. Rossky)

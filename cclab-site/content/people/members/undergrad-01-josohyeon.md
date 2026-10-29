@@ -1,8 +1,8 @@
 ---
 name: 조소현
 group: undergrad
-role: 3학년
-order: 5
+role: 4학년
+order: 1
 email: 
 research: 
 photo: 

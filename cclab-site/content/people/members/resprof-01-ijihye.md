@@ -1,7 +1,7 @@
 ---
 name: 이지혜
-group: postdoc
-role: 박사후연구원
+group: resprof
+role: 연구교수
 order: 1
 email: 
 research: 

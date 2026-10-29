@@ -1,8 +1,8 @@
 ---
-name: 김수아
+name: 배준형
 group: undergrad
-role: 4학년
-order: 2
+role: 3학년
+order: 5
 email: 
 research: 
 photo: 

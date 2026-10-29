@@ -1,5 +1,5 @@
 ---
-name: 이연호
+name: 김예은
 group: undergrad
 role: 3학년
 order: 4
