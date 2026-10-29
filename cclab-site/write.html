@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/highlight/github.min.css">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -79,6 +80,10 @@
 <script>(function(){var t=document.querySelector('.nav-toggle'),n=document.getElementById('nav');if(!t||!n)return;t.addEventListener('click',function(){var o=n.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');});n.addEventListener('click',function(e){if(e.target.closest('a')){n.classList.remove('open');t.setAttribute('aria-expanded','false');}});})();</script>
 <script src="assets/gate.js" defer></script>
 <script src="assets/seasons.js" defer></script>
+<script src="assets/highlight/highlight.min.js" defer></script>
+<script src="assets/highlight/languages/fortran.min.js" defer></script>
+<script src="assets/highlight/languages/matlab.min.js" defer></script>
+<script src="assets/hl-init.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (function () {
@@ -140,20 +145,39 @@
   // 실제 렌더 미리보기 (사이트와 동일하게)
   function mdInline(s) {
     s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`(.+?)`/g, '<code>$1</code>');
+    s = s.replace(/`([^`]+?)`/g, '<code>$1</code>');
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/(?<!\*)\*(?!\s)(.+?)(?<!\s)\*(?!\*)/g, '<em>$1</em>');
+    s = s.replace(/(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)/g, '<em>$1</em>');
     s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%">');
     s = s.replace(/\[([^\]]+)\]\(((?:https?:\/\/|assets\/)[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
     return s;
   }
+  function splitRow(line) { var s = line.trim(); if (s.charAt(0) === '|') s = s.slice(1); if (s.charAt(s.length - 1) === '|') s = s.slice(0, -1); return s.split('|').map(function (c) { return c.trim(); }); }
+  function isSep(line) { if (line.indexOf('|') < 0) return false; var cells = line.trim().replace(/^\||\|$/g, '').split('|').map(function (c) { return c.trim(); }); var any = false; for (var k = 0; k < cells.length; k++) { if (cells[k] === '') continue; any = true; if (!/^:?-{1,}:?$/.test(cells[k])) return false; } return any; }
+  function escCode(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function mdHtml(text) {
     var lines = (text || '').split('\n'), out = [], para = [];
     function flush() { if (para.length) { out.push('<p>' + para.map(mdInline).join('<br>') + '</p>'); para = []; } }
+    var cell = function (tag, val, idx, al) { var s2 = (al[idx] ? ' style="text-align:' + al[idx] + '"' : ''); return '<' + tag + s2 + '>' + mdInline(val) + '</' + tag + '>'; };
     for (var i = 0; i < lines.length; i++) {
-      var ln = lines[i].replace(/\s+$/, '');
-      if (!ln.trim()) flush();
-      else if (/^\s*#/.test(ln)) { flush(); var h = ln.replace(/^\s+/, ''); var lvl = Math.min(h.match(/^#+/)[0].length, 4) + 2; out.push('<h' + lvl + '>' + mdInline(h.replace(/^#+\s*/, '')) + '</h' + lvl + '>'); }
-      else if (/^\s*[-*]\s/.test(ln)) { flush(); var it2 = []; while (i < lines.length && /^\s*[-*]\s/.test(lines[i])) { it2.push('<li>' + mdInline(lines[i].replace(/^\s*[-*]\s/, '')) + '</li>'); i++; } i--; out.push('<ul>' + it2.join('') + '</ul>'); }
-      else para.push(ln);
+      var ln = lines[i].replace(/\s+$/, ''), st = ln.replace(/^\s+/, '');
+      if (st.indexOf('```') === 0) { flush(); var lang = (st.slice(3).trim().split(' ')[0] || '').replace(/[^\w+-]/g, ''); var code = []; i++; while (i < lines.length && lines[i].replace(/^\s+/, '').indexOf('```') !== 0) { code.push(lines[i]); i++; } out.push('<pre><code' + (lang ? ' class="language-' + lang + '"' : '') + '>' + escCode(code.join('\n')) + '</code></pre>'); continue; }
+      if (!ln.trim()) { flush(); continue; }
+      if (/^\s*([-*_])\1{2,}\s*$/.test(ln)) { flush(); out.push('<hr>'); continue; }
+      if (/^\s*#/.test(ln)) { flush(); var lvl = Math.min(st.match(/^#+/)[0].length, 4) + 2; out.push('<h' + lvl + '>' + mdInline(st.replace(/^#+\s*/, '')) + '</h' + lvl + '>'); continue; }
+      if (/^\s*[-*]\s/.test(ln)) { flush(); var it2 = []; while (i < lines.length && /^\s*[-*]\s/.test(lines[i])) { it2.push('<li>' + mdInline(lines[i].replace(/^\s*[-*]\s/, '')) + '</li>'); i++; } i--; out.push('<ul>' + it2.join('') + '</ul>'); continue; }
+      if (/^\s*\d+\.\s/.test(ln)) { flush(); var it3 = []; while (i < lines.length && /^\s*\d+\.\s/.test(lines[i])) { it3.push('<li>' + mdInline(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>'); i++; } i--; out.push('<ol>' + it3.join('') + '</ol>'); continue; }
+      if (st.indexOf('>') === 0) { flush(); var q = []; while (i < lines.length && lines[i].replace(/^\s+/, '').indexOf('>') === 0) { q.push(lines[i].replace(/^\s*>\s?/, '')); i++; } i--; out.push('<blockquote>' + q.map(mdInline).join('<br>') + '</blockquote>'); continue; }
+      if (ln.indexOf('|') >= 0 && i + 1 < lines.length && isSep(lines[i + 1])) {
+        flush();
+        var header = splitRow(ln), al = splitRow(lines[i + 1]).map(function (c) { if (/^:.*:$/.test(c)) return 'center'; if (/:$/.test(c)) return 'right'; if (/^:/.test(c)) return 'left'; return ''; });
+        var thead = '<tr>' + header.map(function (h, j) { return cell('th', h, j, al); }).join('') + '</tr>';
+        i += 2; var rows = [];
+        while (i < lines.length && lines[i].indexOf('|') >= 0 && lines[i].trim()) { var cs = splitRow(lines[i]); rows.push('<tr>' + cs.map(function (c, j) { return cell('td', c, j, al); }).join('') + '</tr>'); i++; }
+        i--; out.push('<div class="table-wrap"><table><thead>' + thead + '</thead><tbody>' + rows.join('') + '</tbody></table></div>'); continue;
+      }
+      para.push(ln);
     }
     flush(); return out.join('\n');
   }
@@ -176,6 +200,7 @@
     rm.classList.toggle('has-pdf', !!(files.length && /\.pdf$/i.test(files[0].name)));
     rmT.textContent = title; rmD.textContent = date;
     rmB.innerHTML = (bodyHtml ? '<div class="modal-text">' + bodyHtml + '</div>' : '') + fileHtml;
+    if (window.cclabHighlight) window.cclabHighlight(rmB);
     rm.hidden = false; document.body.style.overflow = 'hidden';
   });
 

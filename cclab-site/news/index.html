@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/highlight/github.min.css">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
@@ -56,6 +57,10 @@
 <script>(function(){var t=document.querySelector('.nav-toggle'),n=document.getElementById('nav');if(!t||!n)return;t.addEventListener('click',function(){var o=n.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');});n.addEventListener('click',function(e){if(e.target.closest('a')){n.classList.remove('open');t.setAttribute('aria-expanded','false');}});})();</script>
 <script src="../assets/gate.js" defer></script>
 <script src="../assets/seasons.js" defer></script>
+<script src="../assets/highlight/highlight.min.js" defer></script>
+<script src="../assets/highlight/languages/fortran.min.js" defer></script>
+<script src="../assets/highlight/languages/matlab.min.js" defer></script>
+<script src="../assets/hl-init.js" defer></script>
 <script>
 (function () {
   var root = '../';
@@ -76,12 +81,13 @@
       }
       return '<p class="modal-foot"><a href="' + url + '" download>첨부파일 내려받기 (' + ext + ')</a></p>';
     }
+    function put(h) { mBody.innerHTML = h; if (window.cclabHighlight) window.cclabHighlight(mBody); }
     modal.hidden = false; document.body.style.overflow = 'hidden';
     if (file && window.cclabAsk && !window.cclabUnlocked()) {
-      mBody.innerHTML = top + '<p class="modal-note">자료를 보려면 강의에서 안내한 코드를 입력하세요.</p>';
-      window.cclabAsk(function () { mBody.innerHTML = top + fileHtml(); });
+      put(top + '<p class="modal-note">자료를 보려면 코드를 입력하세요.</p>');
+      window.cclabAsk(function () { put(top + fileHtml()); });
     } else {
-      mBody.innerHTML = top + fileHtml();
+      put(top + fileHtml());
     }
   }
   function close() { modal.hidden = true; mBody.innerHTML = ''; document.body.style.overflow = ''; }
