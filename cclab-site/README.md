@@ -86,15 +86,6 @@ python3 process_local.py /받아둔/public_html
 
 직접 빌드하려면: `CCLAB_LOCAL=1 python3 _generator/build.py .` (미리보기: `python3 -m http.server 8000`).
 
-## ⚠️ 보안 — 반드시 확인
-
-받으신 `public_html` 에는 **민감 정보가 있습니다.** 이 사이트에는 포함하지 않지만,
-`public_html` 원본을 **공개 저장소에 올리면 안 됩니다.**
-- `cgi-bin/spboard/member/mem_data/*.cgi` — 게시판 계정 **비밀번호(평문)·이름·이메일·IP**
-- 각 글 본문 파일(`cmt_data/*.cgi`) — 작성자 **비밀번호·IP·브라우저 정보**
-- `admin_conf.cgi`, `setup.cgi`, 게시판별 `conf.cgi` — 관리자 설정
-- 노출된 비밀번호는 **이미 유출됐다고 보고**, 재사용 중이면 바꾸세요.
-
 ## 구조
 
 | 경로 | 내용 |
