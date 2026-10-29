@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>글쓰기 · CCLab@KNU</title>
+<meta name="description" content="강원대학교 화학과 전산화학연구실 (Computational Chemistry Lab, Kangwon National University)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href=""><b>CCLab<span>@</span>KNU</b><small>강원대학교 화학과 전산화학연구실</small></a>
+    <button class="nav-toggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>
+    <nav class="nav" id="nav"><a href="">Home</a><a href="people/">People</a><a href="research/">Research</a><a href="publications/">Publications</a><a href="news/">News</a><a href="courses/">Courses</a><a href="write.html" class="active">✎ 글쓰기</a></nav>
+  </div>
+</header>
+<main><div class="wrap">
+
+<h1 class="page-title">글쓰기</h1>
+<p class="page-lead">폼으로 글을 쓰고 아래 버튼을 누르면 <b>올바른 경로의 MD 파일과 첨부가 담긴 zip</b>이 내려받아집니다.
+그 zip을 사이트 폴더(저장소) 루트에 풀어넣고 커밋(또는 다시 빌드)하면 글이 추가됩니다.</p>
+
+<div class="wform">
+  <label>구분
+    <select id="w-section">
+      <option value="news">News (소식)</option>
+      <option value="course">Courses (강의자료)</option>
+      <option value="pub">Publications (논문)</option>
+    </select>
+  </label>
+  <label id="w-board-wrap">게시판
+    <select id="w-board"></select>
+  </label>
+  <div id="w-title-wrap" class="w-row">
+    <label>제목 <input type="text" id="w-title" placeholder="글 제목"></label>
+    <label>날짜 <input type="text" id="w-date" placeholder="YYYY.MM.DD"></label>
+  </div>
+  <div id="w-pub-wrap">
+    <label>연도 <input type="text" id="w-year" placeholder="2026"></label>
+    <label>인용 정보 (저자, 제목, 저널 · &lt;i&gt; &lt;b&gt; 태그 사용 가능)
+      <textarea id="w-cite" rows="3" placeholder='A. Author, ..., and H. Hwang, "Title", J. Name &lt;b&gt;12&lt;/b&gt;, 345 (2026).'></textarea>
+    </label>
+  </div>
+  <label id="w-body-wrap">본문 (마크다운 · 비워도 됨)
+    <textarea id="w-body" rows="8" placeholder="본문을 마크다운으로 작성"></textarea>
+  </label>
+  <label>첨부파일 <input type="file" id="w-files" multiple></label>
+  <div class="wform-btns">
+    <button type="button" id="w-render-btn" class="btn-ghost">실제 미리보기</button>
+    <button type="button" id="w-preview-btn" class="btn-ghost">MD 미리보기</button>
+    <button type="button" id="w-zip-btn" class="btn">zip 다운로드</button>
+    <button type="button" id="w-fs-btn" class="btn-ghost" style="display:none">폴더에 바로 저장 (크롬)</button>
+  </div>
+  <pre id="w-preview" class="wform-preview" hidden></pre>
+</div>
+
+<div id="pdfModal" class="modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div><h3 id="modalTitle"></h3><time id="modalDate"></time></div>
+      <button class="modal-x" data-close aria-label="닫기">×</button>
+    </div>
+    <div id="modalBody" class="modal-body"></div>
+  </div>
+</div>
+
+</div></main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© Computational Chemistry Lab, Department of Chemistry, Kangwon National University</span>
+    <span>Maintained by Hyonseok Hwang</span>
+  </div>
+</footer>
+<script>(function(){var t=document.querySelector('.nav-toggle'),n=document.getElementById('nav');if(!t||!n)return;t.addEventListener('click',function(){var o=n.classList.toggle('open');t.setAttribute('aria-expanded',o?'true':'false');});n.addEventListener('click',function(e){if(e.target.closest('a')){n.classList.remove('open');t.setAttribute('aria-expanded','false');}});})();</script>
+<script src="assets/gate.js" defer></script>
+<script src="assets/seasons.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function () {
+  var BOARDS = [{id:'genchem',name:'일반화학및실험 1·2'},{id:'natsci',name:'자연과학의 이해'},{id:'advquanchem',name:'고등양자화학 1·2'},{id:'statmech',name:'통계역학'},{id:'compchem',name:'화학을위한수학 (전산화학)'},{id:'physchem',name:'물리화학 1·2'},{id:'quanchem',name:'양자화학'},{id:'compandchem',name:'계산화학과분자모델링 (컴퓨터와화학)'},{id:'chemkinetics',name:'화학반응속도론'},{id:'hhwang',name:'구 강의게시판 (2007–2014, 통합 게시판)'}];
+  var $ = function (id) { return document.getElementById(id); };
+  var sec = $('w-section');
+  function today() { var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()); }
+  $('w-date').value = today();
+  var bs = $('w-board');
+  BOARDS.forEach(function (b) { var o = document.createElement('option'); o.value = b.id; o.textContent = b.name; bs.appendChild(o); });
+  function sync() { var s = sec.value;
+    $('w-board-wrap').style.display = s === 'course' ? '' : 'none';
+    $('w-pub-wrap').style.display = s === 'pub' ? '' : 'none';
+    $('w-title-wrap').style.display = s === 'pub' ? 'none' : '';
+    $('w-body-wrap').style.display = s === 'pub' ? 'none' : '';
+  }
+  sec.addEventListener('change', sync); sync();
+
+  function slug(s) { return (s || '').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '-').slice(0, 40) || 'post'; }
+  function san(n) { return n.replace(/[\\/:*?"<>|]+/g, '_').replace(/\s+/g, '_'); }
+  function fm(obj) { var l = ['---']; Object.keys(obj).forEach(function (k) { if (obj[k] !== '' && obj[k] != null) l.push(k + ': ' + obj[k]); }); l.push('---'); return l.join('\n'); }
+
+  function build() {
+    var s = sec.value, files = $('w-files').files, items = [], mdPath, md;
+    if (s === 'pub') {
+      var year = $('w-year').value.trim(), cite = $('w-cite').value.trim();
+      if (!cite) { alert('인용 정보를 입력하세요.'); return null; }
+      var pdf = files.length ? san(files[0].name) : '';
+      mdPath = 'content/publications/' + (year || 'new') + '-' + slug(cite.slice(0, 24)) + '.md';
+      md = fm({ num: '', year: year, pdf: pdf }) + '\n\n' + cite + '\n';
+      if (files.length) items.push({ path: 'assets/publications/papers/' + pdf, file: files[0] });
+    } else {
+      var title = $('w-title').value.trim(), date = $('w-date').value.trim(), body = $('w-body').value;
+      if (!title) { alert('제목을 입력하세요.'); return null; }
+      var base = date.replace(/\./g, '-') + '-' + slug(title);
+      if (s === 'news') {
+        mdPath = 'content/news/' + base + '.md';
+        var extra = '';
+        for (var i = 0; i < files.length; i++) { var nm = san(files[i].name); extra += '\n\n[첨부: ' + files[i].name + '](assets/uploads/' + nm + ')'; items.push({ path: 'assets/uploads/' + nm, file: files[i] }); }
+        md = fm({ title: title, date: date }) + '\n\n' + body + extra + '\n';
+      } else {
+        var board = $('w-board').value, fileRef = '';
+        for (var j = 0; j < files.length; j++) { var nm2 = san(files[j].name); var pth = 'assets/boards/' + board + '/' + nm2; if (j === 0) fileRef = pth; items.push({ path: pth, file: files[j] }); }
+        mdPath = 'content/courses/' + board + '/' + base + '.md';
+        md = fm({ title: title, date: date, file: fileRef }) + '\n\n' + body + '\n';
+      }
+    }
+    items.unshift({ path: mdPath, text: md });
+    return items;
+  }
+
+  $('w-preview-btn').addEventListener('click', function () {
+    var items = build(); if (!items) return; var p = $('w-preview'); p.hidden = false;
+    var list = items.map(function (it) { return (it.text ? '📄 ' : '📎 ') + it.path; }).join('\n');
+    p.textContent = '[생성될 파일]\n' + list + '\n\n[MD 내용]\n' + items[0].text;
+  });
+
+  // 실제 렌더 미리보기 (사이트와 동일하게)
+  function mdInline(s) {
+    s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`(.+?)`/g, '<code>$1</code>');
+    s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%">');
+    s = s.replace(/\[([^\]]+)\]\(((?:https?:\/\/|assets\/)[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    return s;
+  }
+  function mdHtml(text) {
+    var lines = (text || '').split('\n'), out = [], para = [];
+    function flush() { if (para.length) { out.push('<p>' + para.map(mdInline).join('<br>') + '</p>'); para = []; } }
+    for (var i = 0; i < lines.length; i++) {
+      var ln = lines[i].replace(/\s+$/, '');
+      if (!ln.trim()) flush();
+      else if (/^\s*#/.test(ln)) { flush(); var h = ln.replace(/^\s+/, ''); var lvl = Math.min(h.match(/^#+/)[0].length, 4) + 2; out.push('<h' + lvl + '>' + mdInline(h.replace(/^#+\s*/, '')) + '</h' + lvl + '>'); }
+      else if (/^\s*[-*]\s/.test(ln)) { flush(); var it2 = []; while (i < lines.length && /^\s*[-*]\s/.test(lines[i])) { it2.push('<li>' + mdInline(lines[i].replace(/^\s*[-*]\s/, '')) + '</li>'); i++; } i--; out.push('<ul>' + it2.join('') + '</ul>'); }
+      else para.push(ln);
+    }
+    flush(); return out.join('\n');
+  }
+  var rm = document.getElementById('pdfModal'), rmT = document.getElementById('modalTitle'), rmD = document.getElementById('modalDate'), rmB = document.getElementById('modalBody'), objURLs = [];
+  function closeR() { rm.hidden = true; rmB.innerHTML = ''; document.body.style.overflow = ''; objURLs.forEach(function (u) { URL.revokeObjectURL(u); }); objURLs = []; }
+  rm.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeR(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !rm.hidden) closeR(); });
+  $('w-render-btn').addEventListener('click', function () {
+    var s = sec.value, files = $('w-files').files, title, date, bodyHtml = '';
+    if (s === 'pub') { title = '(논문)'; date = $('w-year').value.trim(); var cite = $('w-cite').value.trim(); if (!cite) { alert('인용 정보를 입력하세요.'); return; } bodyHtml = cite; }
+    else { title = $('w-title').value.trim(); date = $('w-date').value.trim(); if (!title) { alert('제목을 입력하세요.'); return; } bodyHtml = mdHtml($('w-body').value); }
+    var fileHtml = '';
+    if (files.length) {
+      var f = files[0], url = URL.createObjectURL(f); objURLs.push(url);
+      var ext = (f.name.split('.').pop() || '').toLowerCase();
+      if (ext === 'pdf') fileHtml = '<iframe src="' + url + '" style="width:100%;height:60vh;border:0;background:#f4f2ee"></iframe>';
+      else if (/^(jpg|jpeg|png|gif|webp)$/.test(ext)) fileHtml = '<img src="' + url + '" style="max-width:100%;display:block;margin:10px 0">';
+      else fileHtml = '<p class="modal-foot">첨부: ' + f.name + '</p>';
+    }
+    rm.classList.toggle('has-pdf', !!(files.length && /\.pdf$/i.test(files[0].name)));
+    rmT.textContent = title; rmD.textContent = date;
+    rmB.innerHTML = (bodyHtml ? '<div class="modal-text">' + bodyHtml + '</div>' : '') + fileHtml;
+    rm.hidden = false; document.body.style.overflow = 'hidden';
+  });
+
+  $('w-zip-btn').addEventListener('click', function () {
+    var items = build(); if (!items) return;
+    if (typeof JSZip === 'undefined') { alert('JSZip 로딩 실패 — 인터넷 연결이 필요합니다.'); return; }
+    var zip = new JSZip(), pending = [];
+    items.forEach(function (it) { if (it.text != null) zip.file(it.path, it.text); else pending.push(it.file.arrayBuffer().then(function (buf) { zip.file(it.path, buf); })); });
+    Promise.all(pending).then(function () { return zip.generateAsync({ type: 'blob' }); }).then(function (blob) {
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cclab-post.zip'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    });
+  });
+
+  var fsBtn = $('w-fs-btn');
+  if (window.showDirectoryPicker) {
+    fsBtn.style.display = '';
+    fsBtn.addEventListener('click', function () {
+      var items = build(); if (!items) return;
+      window.showDirectoryPicker().then(function (root) {
+        var chain = Promise.resolve();
+        items.forEach(function (it) {
+          chain = chain.then(function () {
+            var parts = it.path.split('/'), dir = Promise.resolve(root);
+            for (var k = 0; k < parts.length - 1; k++) (function (name) { dir = dir.then(function (d) { return d.getDirectoryHandle(name, { create: true }); }); })(parts[k]);
+            return dir.then(function (d) { return d.getFileHandle(parts[parts.length - 1], { create: true }); })
+              .then(function (fh) { return fh.createWritable(); })
+              .then(function (w) { return (it.text != null ? Promise.resolve(it.text) : it.file.arrayBuffer()).then(function (data) { return w.write(data).then(function () { return w.close(); }); }); });
+          });
+        });
+        return chain;
+      }).then(function () { alert('저장 완료. 사이트를 다시 빌드하거나 커밋하세요.'); })
+        .catch(function (e) { if (e.name !== 'AbortError') alert('저장 실패: ' + e.message); });
+    });
+  }
+})();
+</script>
+</body>
+</html>

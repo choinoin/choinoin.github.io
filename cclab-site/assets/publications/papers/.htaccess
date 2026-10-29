@@ -1,0 +1,9 @@
+AuthName "User Authorization" 
+AuthUserFile /wwwuser/office/cclab/public_html/publications/papers/.htpasswd
+AuthGroupFile /dev/null 
+AuthType Basic
+
+<Limit GET>
+Require valid-user 
+</Limit>
+

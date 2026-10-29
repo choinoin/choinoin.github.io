@@ -1,0 +1,41 @@
+name: Build and deploy CCLab site
+
+# content/ 의 .md 파일이나 템플릿이 바뀌어 main 에 올라오면 자동으로 사이트를 다시 만들어 게시합니다.
+# (수동 실행도 가능: Actions 탭 → Run workflow)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build site from content/*.md
+        run: CCLAB_LOCAL=1 python3 _generator/build.py .
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
