@@ -32,7 +32,6 @@ COURSE_BOARDS = [
     ("양자화학", "quanchem"),
     ("계산화학과분자모델링 (컴퓨터와화학)", "compandchem"),
     ("화학반응속도론", "chemkinetics"),
-    ("구 강의게시판 (2007–2014, 통합 게시판)", "hhwang"),
 ]
 
 
